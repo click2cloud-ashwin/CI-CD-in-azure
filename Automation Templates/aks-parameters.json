@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceName": {
+            "value": "testAKScluster"
+        },
+        "location": {
+            "value": "centralus"
+        },
+        "dnsPrefix": {
+            "value": "testAKScluster-dns"
+        },
+        "kubernetesVersion": {
+            "value": "1.21.9"
+        },
+        "networkPlugin": {
+            "value": "azure"
+        },
+        "enableRBAC": {
+            "value": true
+        },
+        "enablePrivateCluster": {
+            "value": false
+        },
+        "enableHttpApplicationRouting": {
+            "value": true
+        },
+        "enableAzurePolicy": {
+            "value": true
+        },
+        "enableSecretStoreCSIDriver": {
+            "value": false
+        },
+        "vmssNodePool": {
+            "value": true
+        },
+        
+        "serviceCidr": {
+            "value": "10.0.0.0/16"
+        },
+        "dnsServiceIP": {
+            "value": "10.0.0.10"
+        },
+        "dockerBridgeCidr": {
+            "value": "172.17.0.1/16"
+        },
+        "workspaceName": {
+            "value": "DefaultWorkspace-9e58d72f-351b-4828-a709-7758de05531b-EUS"
+        },
+        
+        "workspaceRegion": {
+            "value": "eastus"
+        },
+        "networkPolicy": {
+            "value": "calico"
+        }
+        
+        
+    }
+}

@@ -1,0 +1,146 @@
+# Prerequisite pipeline
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  buildConfiguration: 'Release'
+  Location: '<location>'
+  SubscriptionId: '<azure-subscription-id>'
+  AzureResourceManagerConnection: '<service-connection>'
+  acrHostName: '<acr-name.azurecr.io>'
+  acrName: '<acr-name>'
+  rgName: '<resource-group>'
+  ClusterName: '<cluster-name>'
+  webAppName: '<image-name>'
+  DBName: '<db-name>'
+  ServerName: '<sql-db-server>'
+  AdministratorLogin: '<db-user>'
+  AdministratorLoginPassword: '<db-password>'
+  UserAccountID: '<azure-subscription-mail-id>'
+  UserAccountPassword: '<azure-subscription-password>'
+
+  # maintenanceConfigurationId for Azure Sql DB
+  maintenanceConfigurationId: '/subscriptions/$(SubscriptionId)/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default'
+
+  # Connection string for SQL database
+  ConnectionString: "Server=tcp:$(ServerName).database.windows.net,1433;Initial Catalog=$(DBName);Persist Security Info=False;User ID=$(AdministratorLogin);Password='$(AdministratorLoginPassword)';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+
+  # Agent VM image name
+  vmImageName: 'windows-2019'
+
+
+stages:
+- stage: AcrSetup
+  displayName: Azure container registry setup
+  jobs:
+  - job: AcrSetup
+    displayName: Azure container registry setup
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(AzureResourceManagerConnection)
+        subscriptionId: $(SubscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(rgName)
+        location: $(Location)
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/**/acr-template.json'
+        overrideParameters: '-registryName "$(acrName)" -registryLocation "$(Location)" -registrySku standard'
+        deploymentMode: 'Incremental'
+
+
+- stage: ClusterSetup
+  displayName: AKS Cluster Setup
+  jobs:
+  - job: ClusterSetup
+    displayName: AKS Cluster Setup
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(AzureResourceManagerConnection)
+        subscriptionId:  $(SubscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(rgName)
+        location: $(Location)
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/**/cluster.json'
+        csmParametersFile: '$(System.DefaultWorkingDirectory)/**/aks-parameters.json'
+        overrideParameters: '-resourceName "$(ClusterName)" -dnsPrefix "$(ClusterName)-dns" -workspaceRegion "$(Location)"'
+        deploymentMode: 'Incremental'
+
+
+- stage: Integration
+  displayName: Acr Integration
+  dependsOn: ClusterSetup
+  jobs:
+  - job: Integration
+    displayName: Acr Integration
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(AzureResourceManagerConnection)
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az login -u "$(UserAccountID)" -p '$(UserAccountPassword)'
+          az account set --subscription "$(SubscriptionId)"
+          az aks update -n "$(ClusterName)" -g "$(rgName)" --attach-acr "$(acrName)"
+        deploymentMode: 'Incremental'
+
+
+- stage: SqlDBdeploy
+  displayName: Deploy Sql Database
+  dependsOn: Integration
+  jobs:
+  - job: SqlDBdeploy
+    displayName: Sql DB Creation
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(AzureResourceManagerConnection)
+        subscriptionId: $(SubscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName:  $(rgName)
+        location:  $(Location)
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/**/sql-deploy.json'
+        csmParametersFile: '$(System.DefaultWorkingDirectory)/**/sql-parameters.json'
+        overrideParameters: '-maintenanceConfigurationId "$(maintenanceConfigurationId)" -serverName "$(ServerName)" -databaseName "$(DBName)" -location "$(Location)" -administratorLogin "$(AdministratorLogin)" -administratorLoginPassword "$(AdministratorLoginPassword)" '
+        deploymentMode: 'Incremental'
+
+
+- stage: SqlDeployment
+  displayName: Sql DB Deployment
+  dependsOn: SqlDBdeploy
+  jobs:
+  - job: SqlDeployment
+    displayName: Sql DB Deployment
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: SqlAzureDacpacDeployment@1
+      inputs:
+        azureSubscription: $(AzureResourceManagerConnection)
+        AuthenticationType: 'connectionString'
+        ConnectionString: $(ConnectionString)
+        deployType: 'DacpacTask'
+        DeploymentAction: 'Publish'
+        DacpacFile: '$(System.DefaultWorkingDirectory)/**/data.dacpac'
+
+
