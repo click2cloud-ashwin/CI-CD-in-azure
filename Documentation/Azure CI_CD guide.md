@@ -5,12 +5,12 @@ This sample application is a simple task-tracking app built with .NET Framework.
 
 ## Prerequisites:
 ### 1. Import Repository
-*   Create a project inside the Azure DevOps organization in [Azure DevOps](https://dev.azure.com). Also import the github repository of your application within the project.
+*   Create a project inside the Azure DevOps organization in [Azure DevOps](https://dev.azure.com). Also import the GitHub repository of your application within the project.
 
 ### 2. Create a Service Connection
 Before you create your pipeline, you should first create your Service Connection since you will be asked to choose and verify your connection when creating your template. A Service Connection will allow you to connect to your ACR when using the task templates. You can create a new Service Connection following the directions [here](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#create-new). 
 
-* #####  `Note: While creating service connection select Azure Resource Manager option. Also skip the resource group field in next tab.`
+* #####  `Note: While creating a service connection select Azure Resource Manager option. Also, skip the resource group field in the next tab.`
 
 ### 3. The Dockerfile
 The samples below explain the associated Dockerfiles for the .NET Core sample applications linked above. If creating your own application, use the appropriate Dockerfile as below and replace the directory paths to match your application.
@@ -20,7 +20,7 @@ For `.NET Core`, the nano server base image must be “1809” to be compatible 
 
 
 ## Create the Prerequisite Pipeline
-Once you have your repository created in Azure DevOps, or imported from GitHub, you can create your pipeline. On the left menu bar go to Pipelines and click the Create Pipeline button. The next screen will ask you where the code is to create the pipeline from. We already have our code imported, so we can choose Azure Repos Git to select your current repository. As we want to setup the environment (Resource Group, ACR, AKS cluster, Azure SQL Server and Database) so we will choose the Existing Azure Pipelines YAML file that allows us to automatically create a Resource Group, ACR, AKS cluster, Azure SQL Server and Database and also create inside SQL Database.
+Once you have your repository created in Azure DevOps or imported from GitHub, you can create your pipeline. On the left menu bar go to Pipelines and click the Create Pipeline button. The next screen will ask you where the code is to create the pipeline from. We already have our code imported, so we can choose Azure Repos Git to select your current repository. As we want to set up the environment (Resource Group, ACR, AKS cluster, Azure SQL Server and Database) so we will choose the Existing Azure Pipelines YAML file that allows us to automatically create a Resource Group, ACR, AKS cluster, Azure SQL Server and Database and also create inside SQL Database.
 
 ![image](https://user-images.githubusercontent.com/69102413/160376686-41c91f37-920c-4dc5-a8f0-7e07e5c07a9d.png)
 
@@ -29,14 +29,14 @@ Select the branch and locate the `prerequisite-pipeline.yaml` file. Here provide
 ![image](https://user-images.githubusercontent.com/82659622/160397341-cf527301-7248-41fa-bdbf-86e960f7b8a7.png)
 
 Finally run the pipeline. 
-* #####  `Note: This app has a data.dacpac file which is used to create Table inside Database. For other apps you need to create a dacpac file by following step.`  
+* #####  `Note: This app has a data.dacpac file which is used to create a Table inside Database. For other apps, you need to create a dacpac file by following step.`  
 
 ### Creating a dacpac file in your project
 As mentioned before, you’ll need to use either a dacpac file or set of SQL scripts to deploy your database schema. If you are using Visual Studio, it’s easy to create and add the needed dacpac file to run the action.
 
 1. Connect your SQL Azure Database to Visual Studio
-2. Right-click the data base and choose Extract Data-tier application
-3. On the following window, choose the location at the same level of your github workflow file and click create.
+2. Right-click the database and choose Extract Data-tier application
+3. On the following window, choose the location at the same level of your GitHub workflow file and click create.
     
   ![image](https://user-images.githubusercontent.com/82659622/157430098-c8b8d861-f56a-42c1-8302-d39d7276e9aa.png)
   
@@ -58,7 +58,7 @@ Choose your `subscription` that you will be pushing your resources to, then pick
 
 ### Summary
 
-From here you are setup to continuously build your Windows Container application through Azure DevOps. Below you’ll see the final result of the workflow yaml file.
+From here you are set up to continuously build your Windows Container application through Azure DevOps. Below you’ll see the final result of the workflow yaml file.
 
 #### Full workflow file
 
