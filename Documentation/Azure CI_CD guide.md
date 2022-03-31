@@ -24,7 +24,7 @@ Once you have your repository created in Azure DevOps or imported from GitHub, y
 
 ![image](https://user-images.githubusercontent.com/69102413/160376686-41c91f37-920c-4dc5-a8f0-7e07e5c07a9d.png)
 
-Select the branch and locate the `prerequisite-pipeline.yaml` file. Here provide the values for all the environment variables. 
+Select the branch and locate the `prerequisite-pipeline.yaml` file. Here provide the values for all the environment variables. The value for AzureResourceConnectionManager is the name of service connection which you created earlier.
 
 ![image](https://user-images.githubusercontent.com/82659622/160397341-cf527301-7248-41fa-bdbf-86e960f7b8a7.png)
 
