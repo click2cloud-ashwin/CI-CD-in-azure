@@ -28,7 +28,10 @@ Select the branch and locate the `prerequisite-pipeline.yaml` file. Here provide
 
 ![image](https://user-images.githubusercontent.com/82659622/160397341-cf527301-7248-41fa-bdbf-86e960f7b8a7.png)
 
-Finally run the pipeline. 
+Finally run the pipeline. Once the prerequisite-pipeline run successfully, disable the automatic trigger of prerequisite pipeline by changing branch name to none as we want to run this pipeline only once. You can enable it whenever you wish to rerun this pipeline.
+
+![image](https://user-images.githubusercontent.com/82659622/161244070-855796c6-9688-4033-8fa0-7c51b91e3d3e.png)
+
 * #####  `Note: This app has a data.dacpac file which is used to create a Table inside Database. For other apps, you need to create a dacpac file by following step.`  
 
 ### Creating a dacpac file in your project
